@@ -506,11 +506,6 @@ class PicoQuake:
                       num_samples: int = 0):
         """
         Sends a command to the device.
-
-        Args:
-            cmd_id: The command ID.
-            config: The configuration to send with the command.
-            num_samples: The number of samples to acquire.
         """
         msg = messages_pb2.Command()
         msg.id = cmd_id.value
@@ -520,6 +515,8 @@ class PicoQuake:
             msg.acc_range = config.acc_range.index
             msg.gyro_range = config.gyro_range.index
             msg.num_to_sample = num_samples
+            # ADD THESE DEBUG LINES:
+            self._logger.debug(f"Config being sent: data_rate={msg.data_rate}, filter={msg.filter_config}, acc={msg.acc_range}, gyro={msg.gyro_range}, num_samples={num_samples}")
         packet = cobs.encode(msg.SerializeToString())
         packet = bytes([0x00]) + bytes([PacketID.COMMAND.value]) + packet + bytes([0x00])
         self._out_packet_queue.put_nowait(packet)

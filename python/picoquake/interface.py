@@ -579,7 +579,7 @@ class PicoQuake:
         """
         Main serial worker thread receiving and sending serial data.
         Packet decode errors are logged and ignored.
-
+    
         Raises:
             ConnectionError: If cannot connect to the device or if the connection is lost.
         """
@@ -594,6 +594,7 @@ class PicoQuake:
             raise ConnectionError(f"Permission denied on port {self._port}. Check user permissions.")
         in_buffer = bytearray()
         receiving_packet = False
+        packet_count = 0  # ADD THIS
         try:
             while not self._stop_event.is_set():
                 # receive
@@ -602,13 +603,18 @@ class PicoQuake:
                 except SerialException as e:
                     raise ConnectionError("Connection lost, port closed")
                 if len(data) > 0:
+                    self._logger.debug(f"Received {len(data)} bytes")  # ADD THIS
                     for b in data:
                         if b == 0x00:
                             if receiving_packet:
                                 if len(in_buffer) > 0:
                                     # stop flag, end of packet
+                                    packet_count += 1  # ADD THIS
+                                    self._logger.debug(f"Packet {packet_count}: {len(in_buffer)} bytes")  # ADD THIS
                                     try:
-                                        self._in_message_queue.put_nowait(self._decode_packet(in_buffer))
+                                        msg = self._decode_packet(in_buffer)  # ADD THIS
+                                        self._logger.debug(f"Decoded: {type(msg)}")  # ADD THIS
+                                        self._in_message_queue.put_nowait(msg)  # MODIFIED
                                     except Exception as e:
                                         self._logger.error(f"Decode error: {e}")
                                     in_buffer.clear()

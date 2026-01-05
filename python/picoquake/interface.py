@@ -20,7 +20,7 @@ from .msg import messages_pb2
 from .configuration import *
 from .data import *
 from .exceptions import *
-from .analisys import *
+from .analysis import *
 from .utils import *
 
 VID = 0x2E8A
@@ -190,7 +190,7 @@ class PicoQuake:
             ConnectionError: If the acquisition times out or if not all samples are received. Incomplete data is still saved.
         """
         if self._continuous_mode:
-            raise RuntimeError("Continuos mode is active, stop it before acquiring")
+            raise RuntimeError("Continuous mode is active, stop it before acquiring")
         if seconds != 0 and n_samples != 0:
             raise ValueError("Either seconds or n_samples must be specified, not both")
         if seconds == 0 and n_samples == 0:
@@ -254,7 +254,7 @@ class PicoQuake:
         self._continuous_mode = True
         self._sample_deque = deque(maxlen=_LEN_DEQUE)
         self._start_sampling()
-        self._logger.info("Continuos mode started")
+        self._logger.info("Continuous mode started")
 
     def stop_continuous(self):
         """
@@ -262,7 +262,7 @@ class PicoQuake:
         """
         self._continuous_mode = False
         self._stop_sampling()
-        self._logger.info("Continuos mode stopped")
+        self._logger.info("Continuous mode stopped")
 
     def read(self, num: int=1, timeout: Optional[float]=None) -> List[IMUSample]:
         """
@@ -281,7 +281,7 @@ class PicoQuake:
             RuntimeError: If continuous mode is not started.
         """
         if not self._continuous_mode:
-            raise RuntimeError("Continuos mode not started")
+            raise RuntimeError("Continuous mode not started")
         start_time = time()
         while len(self._sample_deque) < num:
             if timeout is not None:
@@ -431,7 +431,7 @@ class PicoQuake:
             RuntimeError: If continuous mode is not started.
         """       
         if not self._continuous_mode:
-            raise RuntimeError("Continuos mode not started")
+            raise RuntimeError("Continuous mode not started")
 
         start_time = time()
         while len(self._sample_deque) < 1:

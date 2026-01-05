@@ -647,6 +647,7 @@ class PicoQuake:
         Decodes the packet received from the device.
         """
         packet_id = PacketID(packet[0])
+        self._logger.debug(f"Packet ID: {packet_id}")  # ADD THIS
         decoded = cobs.decode(packet[1:])
         if packet_id == PacketID.IMU_DATA:
             unpacked_data = struct.unpack('<Qffffff', decoded)

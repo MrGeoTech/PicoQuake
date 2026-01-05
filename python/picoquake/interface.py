@@ -644,17 +644,25 @@ class PicoQuake:
         Decodes the packet received from the device.
         """
         packet_id = PacketID(packet[0])
-        self._logger.debug(f"Packet ID: {packet_id}")  # ADD THIS
+        self._logger.debug(f"Packet ID: {packet_id}, raw bytes: {packet[:20].hex()}")  # Show first 20 bytes
         decoded = cobs.decode(packet[1:])
+        self._logger.debug(f"After COBS decode: {decoded[:40].hex() if len(decoded) > 0 else 'empty'}")  # Show decoded data
+        
         if packet_id == PacketID.IMU_DATA:
-            unpacked_data = struct.unpack('<Qffffff', decoded)
-            msg = IMUSample(unpacked_data[0],
-                            unpacked_data[1],
-                            unpacked_data[2],
-                            unpacked_data[3],
-                            unpacked_data[4],
-                            unpacked_data[5],
-                            unpacked_data[6])
+            self._logger.debug(f"Attempting to decode IMU data, length: {len(decoded)}")
+            try:
+                unpacked_data = struct.unpack('<Qffffff', decoded)
+                msg = IMUSample(unpacked_data[0],
+                                unpacked_data[1],
+                                unpacked_data[2],
+                                unpacked_data[3],
+                                unpacked_data[4],
+                                unpacked_data[5],
+                                unpacked_data[6])
+                self._logger.debug(f"Successfully decoded IMU sample: {msg}")
+            except struct.error as e:
+                self._logger.error(f"Struct unpack error: {e}, decoded length: {len(decoded)}")
+                raise
         elif packet_id == PacketID.STATUS:
             msg = messages_pb2.Status.FromString(decoded)
         elif packet_id == PacketID.DEVICE_INFO:

@@ -125,6 +125,7 @@ void __time_critical_func(DataReadyInterrupt)() {
 #ifdef LED_ON_SPI_TRANSFER_DEBUG
   digitalWrite(usr_led, HIGH);
 #endif
+  DEBUG_PRINTF("int");
   ++interrupt_count;
   // check if the requested number of samples has been taken
   // 0 means continuous sampling
@@ -254,7 +255,9 @@ void StartSampling(ICM42688P::OutputDataRate rate,
                    uint64_t num_to_sample = 0) {
   // todo: quickfix for now (rate not hot changing correctly)
   icm.SoftReset();
+  delay(50);
   SetupICM();
+  delay(50);
   // ...
 
   // set global sample num request
@@ -284,6 +287,7 @@ void StartSampling(ICM42688P::OutputDataRate rate,
 
 // stop sampling
 void StopSampling() {
+  DEBUG_PRINTF("Sampling stopped");
   icm.SetAccelModeOff();
   icm.SetGyroModeOff();
   // stop data ready interrupt
@@ -385,9 +389,9 @@ void SendIMUData() {
     return;
   }
 
-  // DEBUG_PRINTF("Accel: %f %f %f Gyro: %f %f %f\r\n", DataToSend.acc_x,
-  // DataToSend.acc_y, DataToSend.acc_z, DataToSend.gyro_x, DataToSend.gyro_y,
-  // DataToSend.gyro_z);
+  //DEBUG_PRINTF("Accel: %f %f %f Gyro: %f %f %f\r\n", DataToSend.acc_x,
+  //  DataToSend.acc_y, DataToSend.acc_z, DataToSend.gyro_x, DataToSend.gyro_y,
+  //  DataToSend.gyro_z);
 
   // nanopb
   nanopb_stream = pb_ostream_from_buffer(nanopb_buffer, sizeof(nanopb_buffer));
